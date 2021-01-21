@@ -47,6 +47,15 @@ app.get('/createtable',(req,res)=>{
     })
 
 });
+////////VALIDATION
+const Joi = require("@hapi/joi");
+
+const schema = Joi.object({
+    fname: Joi.string().min(3).required(),
+    lname: Joi.string().min(3).required(),
+    email: Joi.string().email().min(6).required(),
+    password: Joi.string().min(6).required()
+});
 
 //GET ALL
 app.route("/users")
@@ -69,6 +78,13 @@ app.route("/users")
 })
 //POST
 .post((req,res)=>{
+
+    const { error } = schema.validate(req.body);
+
+    if(error){
+        return res.status(400).send(error.details[0].message);
+    }
+
     let user={
         fname:req.body.fname,
         lname:req.body.lname,
