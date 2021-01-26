@@ -10,6 +10,8 @@ app.use('/users', usersRouter);
 
 app.use('/create', dbRouter);
 
-app.listen('3000',()=>{
-    console.log("Server started on Port 3000");
+module.exports= app.listen('3001',()=>{
+    console.log("Server started on Port 3001");
 });
+
+

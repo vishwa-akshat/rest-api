@@ -38,6 +38,21 @@ const loginValidation = (data)=>{
     return schema.validate(data);
 };
 
+const passwordValidation = (data)=>{
+
+    const schema = Joi.object({
+        oldPassword: Joi.string()
+        .min(6)
+        .required(),
+        newPassword: Joi.string()
+        .min(6)
+        .required()
+    });
+    
+    return schema.validate(data);
+};
+
 module.exports.registerValidation = registerValidation;
 module.exports.loginValidation = loginValidation;
+module.exports.passwordValidation = passwordValidation;
 
