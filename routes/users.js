@@ -31,10 +31,17 @@ router.route("/register")
                 message: err.message
             })
         }
-        res.status(200).json({
-            success:1,
-            data: results
-        });
+        if(results.length===0) {
+            res.status(401).json({
+                message: "No users in database"
+            })
+        }
+        if(results.length===1){
+            res.status(200).json({
+                success:1,
+                data: results
+            });
+        }
     })
 })
 //POST
@@ -126,10 +133,18 @@ router.route("/register/:id")
                 message: err.message
             })
         }
-        res.status(200).json({
-            success:1,
-            data: result[0]
-        });
+        if(result.length===0){
+            res.status(400).json({
+                        message: "ID/User Doesn't Exist"
+                    })
+        }
+        
+        if(result.length===1){
+            res.status(200).json({
+                success:1,
+                data: result[0]
+            });
+        }
     })
 })
 //UPDATE 
@@ -183,21 +198,43 @@ router.route("/register/:id")
     
 })
 //DELETE
-.delete(verify,(req,res)=>{
-    let sql = `DELETE FROM users WHERE id=${req.params.id};`
-
-    let query = db.query(sql,(err, result)=>{
+.delete((req,res)=>{
+     // CHECK IF ID EXIST
+     db.query(`SELECT * FROM users WHERE id="${req.params.id}";`,async (err, result)=>{
         if(err){
-            res.json({
-                success: 0,
-                message:err.message
-            });
+            res.status(400).json({
+                success:0,
+                message: err.message
+            })
         }
-        res.json({
-            success: 1,
-            message: `Deleted user with ID ${req.params.id}`
-        });
-    })
+        if(result.length===0){
+            res.status(400).json({
+                        message: "User Doesn't Exist"
+                    })
+        }
+        
+        if(result.length===1){
+            let sql = `DELETE FROM users WHERE id=${req.params.id};`
+
+            let query = db.query(sql,(err, result)=>{
+
+                if(err){
+                    res.status(400).json({
+                        success: 0,
+                        message:err.message
+                    });
+                }
+                res.status(200).json({
+                    success: 1,
+                    message: `Deleted user with ID ${req.params.id}`
+                });
+
+            })
+        }
+        
+    });
+
+    
 });
 
 
@@ -222,14 +259,14 @@ router.route("/login")
         }
         if(result.length===0){
             res.status(400).json({
-                        message: "Email or Password is incorrect"
+                        message: "Email is incorrect"
                     })
         }
         
         if(result.length===1){
             const validPass = await bcrypt.compare(req.body.password, result[0].password);
             if(!validPass){
-                res.status(400).json({
+                res.status(401).json({
                     message:"Invalid Password"
                 })
             }
@@ -238,7 +275,7 @@ router.route("/login")
             //CREATE and assign Token
 
             const token = jwt.sign({_pass:result[0].password}, process.env.TOKEN_SECRET);
-            res.header('auth-token', token).send(token);
+            res.status(200).header('auth-token', token).send(token);
             
         }
         
